@@ -1,0 +1,14 @@
+FROM python:3.5.2-alpine
+
+WORKDIR /backend
+
+COPY conduit-backend .
+COPY entrypoint-backend.sh .
+
+RUN  pip install -r requirements.txt && \
+    chmod +x entrypoint-backend.sh && \
+    pip install gunicorn==20.1.0
+
+EXPOSE 8000
+
+ENTRYPOINT ["./entrypoint-backend.sh"]

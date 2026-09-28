@@ -1,0 +1,38 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    restart: unless-stopped
+    volumes:
+      - frontend_data:/frontend
+    ports:
+      - "8282:80"
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    restart: unless-stopped
+    volumes:
+      - backend_data:/backend
+    depends_on:
+      - database
+  database:
+    image: postgres:18.6-alpine
+    container_name: database
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  frontend_data:
+  backend_data:
+  postgres_data:
+
+   
