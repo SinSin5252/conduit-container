@@ -2,12 +2,16 @@ FROM python:3.5.2-alpine
 
 WORKDIR /backend
 
+RUN apk add --no-cache \
+    postgresql-dev \
+    gcc \
+    musl-dev
+
 COPY conduit-backend .
 COPY entrypoint-backend.sh .
 
 RUN  pip install -r requirements.txt && \
-    chmod +x entrypoint-backend.sh && \
-    pip install gunicorn==20.1.0
+    chmod +x entrypoint-backend.sh
 
 EXPOSE 8000
 
