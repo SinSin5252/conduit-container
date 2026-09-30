@@ -27,7 +27,8 @@ services:
     volumes:
       - backend_data:/backend
     depends_on:
-      - database
+      database:
+        condition: service_healthy
   database:
     image: postgres:10-alpine
     container_name: database
@@ -38,6 +39,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
 
 volumes:
   frontend_data:
