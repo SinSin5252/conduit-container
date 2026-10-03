@@ -3,10 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+    image: frontend-image:local
     container_name: frontend
     restart: unless-stopped
-    volumes:
-      - frontend_data:/frontend
     ports:
       - "8282:80"
     depends_on:
@@ -15,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    image: backend-image:local
     container_name: backend
     restart: unless-stopped
     environment:
@@ -24,8 +24,6 @@ services:
       DB_HOST: database
       DB_PORT: ${POSTGRES_PORT}
       IP_ADDRESS_SERVER: ${IP_ADDRESS_SERVER}
-    volumes:
-      - backend_data:/backend
     depends_on:
       database:
         condition: service_healthy
@@ -46,8 +44,6 @@ services:
       retries: 5
 
 volumes:
-  frontend_data:
-  backend_data:
   postgres_data:
 
    
