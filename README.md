@@ -8,7 +8,7 @@ This project is a containerized web application consisting of three main compone
 
 Each component runs in its own Docker container and communicates with the other services through the Docker network.
 
-## Table of Content
+## Table of Contents
 
 - [Quickstart](#quickstart)
     - [Prerequisities](#prerequisities)
@@ -36,18 +36,20 @@ In order to quickly get started with the project follow these steps:
 
 - [Docker](https://www.docker.com/products/docker-desktop)
 
-1. Clone the repository 
+1. Clone the repositorys
+```
+git clone https://github.com/SinSin5252/conduit-container.git
+cd conduit-container
+git clone https://github.com/SinSin5252/conduit-frontend.git
+git clone https://github.com/SinSin5252/conduit-backend.git
+```
 
-2. Navigate to the repository
-
-3. Clone both repositorys https://github.com/SinSin5252/conduit-frontend.git and https://github.com/SinSin5252/conduit-backend.git
-
-4. Create a `.env` based on the `.env.example` file
+2. Create a `.env` based on the `.env.example` file in the `conduit-container` directory.
 ```
 cp .env.example .env
 ```
 
-5. Before starting the containers, you need to change the `IP_ADDRESS_SERVER` in the `.env` file to the IP-Address of your server. 
+3. Before starting the containers, you need to change the `IP_ADDRESS_SERVER` in the `.env` file to the IP-Address of your server. 
 
 ### Run on Docker
 
@@ -73,6 +75,44 @@ docker compose logs
 
 Once the containers started successfully, the Angular page can be accessed by entering [IP-Server]:8282 in the browser's address bar.
 
+Alternatively, the containers can be started manually using docker run.
+
+1. Build the frontend and backend images:
+```
+docker build -f Dockerfile.frontend -t conduit-frontend .
+docker build -f Dockerfile.backend -t conduit-backend .
+```
+
+2. Create a Docker network for the containers:
+```
+docker network create conduit-network
+```
+
+3. Start the PostgreSQL database container:
+```
+docker run -d --name database --network conduit-network -e POSTGRES_DB=<database-name> -e POSTGRES_USER=<database-user> -e POSTGRES_PASSWORD=<database-password> postgres:10-alpine
+```
+4. Start the Django backend container:
+```
+docker run -d --name backend --network conduit-network -e DB_NAME=<database-name> -e DB_USER=<database-user> -e DB_PASSWORD=<database-password> -e DB_HOST=database -e DB_PORT=5432 -p 8000:8000 conduit-backend
+```
+
+5. Start the Angular frontend container:
+```
+docker run -d --name frontend --network conduit-network -p 8282:80 conduit-frontend
+```
+
+6. Check whether all containers are running:
+```
+docker ps
+```
+
+7. To view all container logs:
+```
+docker logs frontend
+docker logs backend
+docker logs database
+```
 
 ## Usage
 
