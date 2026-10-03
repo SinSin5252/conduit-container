@@ -24,6 +24,8 @@ services:
       DB_HOST: database
       DB_PORT: ${POSTGRES_PORT}
       IP_ADDRESS_SERVER: ${IP_ADDRESS_SERVER}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
     depends_on:
       database:
         condition: service_healthy
