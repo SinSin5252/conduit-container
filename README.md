@@ -38,10 +38,8 @@ In order to quickly get started with the project follow these steps:
 
 1. Clone the repositorys
 ```
-git clone https://github.com/SinSin5252/conduit-container.git
+git clone --recurse-submodules https://github.com/SinSin5252/conduit-container.git
 cd conduit-container
-git clone https://github.com/SinSin5252/conduit-frontend.git
-git clone https://github.com/SinSin5252/conduit-backend.git
 ```
 
 2. Create a `.env` based on the `.env.example` file in the `conduit-container` directory.
@@ -90,11 +88,11 @@ docker network create conduit-network
 
 3. Start the PostgreSQL database container:
 ```
-docker run -d --name database --network conduit-network -e POSTGRES_DB=<database-name> -e POSTGRES_USER=<database-user> -e POSTGRES_PASSWORD=<database-password> postgres:10-alpine
+docker run -d --name database --network conduit-network -e POSTGRES_DB=${POSTGRES_DB} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} postgres:10-alpine
 ```
 4. Start the Django backend container:
 ```
-docker run -d --name backend --network conduit-network -e DB_NAME=<database-name> -e DB_USER=<database-user> -e DB_PASSWORD=<database-password> -e DB_HOST=database -e DB_PORT=5432 -p 8000:8000 conduit-backend
+docker run -d --name backend --network conduit-network -e DB_NAME=${POSTGRES_DB} -e DB_USER=${POSTGRES_USER} -e DB_PASSWORD=${POSTGRES_PASSWORD} -e DB_HOST=database -e DB_PORT=5432 -p 8000:8000 conduit-backend
 ```
 
 5. Start the Angular frontend container:
