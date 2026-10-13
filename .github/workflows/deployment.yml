@@ -12,9 +12,12 @@ permissions:
   packages: write
 
 jobs:
-  test:
+  Test:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./conduit-container
 
     steps:
 
@@ -46,7 +49,7 @@ jobs:
   deploy:
     name: Deployment
     runs-on: ubuntu-latest
-    needs: test
+    needs: Test
 
     steps:
       - name: Deploy to V-Server
