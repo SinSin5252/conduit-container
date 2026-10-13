@@ -3,7 +3,7 @@ name: CI/CD Pipeline Conduit Container
 on:
 
   push:
-    branches: [ "main" ]
+    branches: [ "featurebranch/deployment" ]
 
   workflow_dispatch:
 
@@ -67,7 +67,7 @@ jobs:
             fi
             
             git pull 
-
             git submodule update --init
+
             docker compose down
             docker compose up -d --build
