@@ -30,18 +30,14 @@ jobs:
         run: docker compose -f docker-compose.yaml up -d
 
       - name: Check if conduit container is running
-        run: docker compose ps
+        run: docker compose -f docker-compose.yaml ps
       
       - name: Check if website is running
         run: curl --fail --retry 10 --retry-delay 3 http://localhost:8282
 
       - name: Show logs if test fails
         if: failure()
-        run: docker compose -f docker-compose.yml logs
-
-      - name: Stop test containers
-        if: always()
-        run: docker compose -f docker-compose.yml down
+        run: docker compose -f docker-compose.yaml logs
     
   deploy:
     name: Deployment
@@ -69,5 +65,5 @@ jobs:
             git pull 
             git submodule update --init
 
-            docker compose down
-            docker compose up -d --build
+            docker compose -f docker-compose.yaml down
+            docker compose -f docker-compose.yaml up -d --build
