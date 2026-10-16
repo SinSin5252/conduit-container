@@ -47,11 +47,22 @@ jobs:
 
           echo "1. Register test user"
 
-          curl --fail --silent --show-error \
-            -X POST "$BASE_URL/api/users" \
+          curl -i -X POST http://localhost:8282/api/users \
             -H "Content-Type: application/json" \
-            -d "{\"user\":{\"username\":\"$USERNAME\",\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}" \
-            -o register.json
+            -d '{
+              "user": {
+              "username": "$USERNAME",
+              "email": "$EMAIL",
+              "password": "$PASSWORD"
+              }
+            }'
+
+
+          # curl --fail --silent --show-error \
+          #   -X POST "$BASE_URL/api/users" \
+          #   -H "Content-Type: application/json" \
+          #   -d "{\"user\":{\"username\":\"$USERNAME\",\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}" \
+          #   -o register.json
 
           echo "2. Login"
 
