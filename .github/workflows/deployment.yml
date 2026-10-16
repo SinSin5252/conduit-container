@@ -35,6 +35,46 @@ jobs:
       - name: Check if website is running
         run: curl --fail --retry 10 --retry-delay 3 http://localhost:8282
 
+      - name: Test registration, login and authentication
+        env:
+          BASE_URL: http://localhost:8282
+        run: |
+          set -e
+
+          USERNAME="${TEST_ID}"
+          EMAIL="${TEST_ID}@example.com"
+          PASSWORD="${TEST_PASSWORD}"
+
+          echo "1. Register test user"
+
+          curl --fail --silent --show-error \
+            -X POST "$BASE_URL/api/users" \
+            -H "Content-Type: application/json" \
+            -d "{\"user\":{\"username\":\"$USERNAME\",\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}" \
+            -o register.json
+
+          echo "2. Login"
+
+          curl --fail --silent --show-error \
+            -X POST "$BASE_URL/api/users/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"user\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}" \
+            -o login.json
+
+          TOKEN=$(jq -er '.user.token' login.json)
+
+          echo "3. Access protected user endpoint"
+
+          curl --fail --silent --show-error \
+            "$BASE_URL/api/user" \
+            -H "Authorization: Token $TOKEN" \
+            -o user.json
+
+          jq -e --arg email "$EMAIL" \
+            '.user.email == $email' user.json
+
+          echo "Registration, login and authentication successful"
+
       - name: Show logs if test fails
         if: failure()
         run: docker compose -f docker-compose.yaml logs
