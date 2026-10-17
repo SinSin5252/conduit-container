@@ -47,11 +47,8 @@ jobs:
 
           echo "1. Register test user"
 
-          curl --fail-with-body --show-error \
-            -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"user":{"email":"$EMAIL","password":"$PASSWORD","username":"$USERNAME"}}' \
-            http://localhost:8282/api/users
+          curl -v http://localhost:8282/api/users -H 'Content-Type: application/json' --data '{"user":{"email":"$EMAIL","password":"$PASSWORD","username":"$USERNAME"}}'
+
 
           echo "2. Login"
 
