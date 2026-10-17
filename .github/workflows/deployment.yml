@@ -1,0 +1,106 @@
+name: CI/CD Pipeline Conduit Container
+
+on:
+
+  push:
+    branches: [ "featurebranch/deployment" ]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  Test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with: 
+          submodules: true
+
+      - name: Build environment
+        run: cp .env.example .env
+
+      - name: Run conduit container compose
+        run: docker compose -f docker-compose.yaml up -d
+
+      - name: Check if conduit container is running
+        run: docker compose -f docker-compose.yaml ps
+      
+      - name: Check if website is running
+        run: curl --fail --retry 10 --retry-delay 3 http://localhost:8282
+
+      - name: Test registration, login and authentication
+        env:
+          BASE_URL: http://localhost:8282
+        run: |
+          set -e
+
+          USERNAME="${TEST_ID}"
+          EMAIL="${TEST_ID}@example.com"
+          PASSWORD="${TEST_PASSWORD}"
+
+          echo "1. Register test user"
+
+          curl -v http://localhost:8282/api/users -H 'Content-Type: application/json' --data '{"user":{"email":"$EMAIL","password":"$PASSWORD","username":"$USERNAME"}}'
+
+
+          echo "2. Login"
+
+          curl --fail --silent --show-error \
+            -X POST "$BASE_URL/api/users/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"user\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}" \
+            -o login.json
+
+          TOKEN=$(jq -er '.user.token' login.json)
+
+          echo "3. Access protected user endpoint"
+
+          curl --fail --silent --show-error \
+            "$BASE_URL/api/user" \
+            -H "Authorization: Token $TOKEN" \
+            -o user.json
+
+          jq -e --arg email "$EMAIL" \
+            '.user.email == $email' user.json
+
+          echo "Registration, login and authentication successful"
+
+      - name: Show logs if test fails
+        if: failure()
+        run: docker compose -f docker-compose.yaml logs
+    
+  deploy:
+    name: Deployment
+    runs-on: ubuntu-latest
+    needs: Test
+
+    steps:
+      - name: Deploy to V-Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+
+            cd ~/conduit-container
+
+            BRANCH=$(git branch --show-current)
+
+            if [ "$BRANCH" != "main" ]; then
+              git checkout main
+            fi
+            
+            git pull 
+            git submodule update --init
+
+            docker compose -f docker-compose.yaml down
+            docker compose -f docker-compose.yaml up -d --build
